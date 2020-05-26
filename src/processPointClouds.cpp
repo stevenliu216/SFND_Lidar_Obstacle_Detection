@@ -27,7 +27,6 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
 
-    // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
     typename pcl::PointCloud<PointT>::Ptr cloudFiltered (new pcl::PointCloud<PointT>);
     pcl::VoxelGrid<PointT> sor;
     sor.setInputCloud(cloud);
@@ -42,7 +41,7 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     roi_filter.setMax(maxPoint);
     roi_filter.filter(*cloudRegion);
 
-    //remove the ego vehicle from scan
+    //remove the roof points
     pcl::CropBox<PointT> roof(true);
     roof.setMin(Eigen::Vector4f(-1.5, -1.7,-1,1));
     roof.setMax(Eigen::Vector4f(2.6, 1.7, -.4, 1));
@@ -50,7 +49,6 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     std::vector<int> indices;
     roof.filter(indices);
 
-    //remove the roof points
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     for (int point : indices)
       inliers->indices.push_back(point);
@@ -71,7 +69,6 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 template<typename PointT>
 std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) 
 {
-  // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
     typename pcl::PointCloud<PointT>::Ptr obstCloud (new pcl::PointCloud<PointT>());
     typename pcl::PointCloud<PointT>::Ptr planeCloud (new pcl::PointCloud<PointT>());
     pcl::ExtractIndices<PointT> extract;
@@ -94,20 +91,20 @@ std::unordered_set<int> ProcessPointClouds<PointT>::myRansac(typename pcl::Point
     std::unordered_set<int> inliersResult;
     srand(time(NULL));
 
-	int numcloud = cloud->points.size();
-	for(int i=0; i<maxIterations; i++){
+    int numcloud = cloud->points.size();
+    for(int i=0; i<maxIterations; i++){
         iinliers.clear();
         for (int j=0; j < 3; j++) {
             iinliers.insert(rand() % (numcloud));
         }
 
         PointT p1=cloud->points[(rand() % numcloud)];
-		PointT p2=cloud->points[(rand() % numcloud)];
+        PointT p2=cloud->points[(rand() % numcloud)];
         PointT p3=cloud->points[(rand() % numcloud)];
 
-		float A = (p2.y - p1.y)*(p3.z - p1.z) - (p2.z - p1.z)*(p3.y - p1.y);
-		float B = (p2.z - p1.z)*(p3.x - p1.x) - (p2.x - p1.x)*(p3.z - p1.z);
-		float C = (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
+        float A = (p2.y - p1.y)*(p3.z - p1.z) - (p2.z - p1.z)*(p3.y - p1.y);
+        float B = (p2.z - p1.z)*(p3.x - p1.x) - (p2.x - p1.x)*(p3.z - p1.z);
+        float C = (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
         float D = -(A*p1.x + B*p1.y + C*p1.z);
         // iterate through all points in the pointcloud
         for (int index=0; index < numcloud; index++) {
@@ -126,7 +123,7 @@ std::unordered_set<int> ProcessPointClouds<PointT>::myRansac(typename pcl::Point
         if (iinliers.size() > inliersResult.size()) {
             inliersResult = iinliers;
         }
-	}
+    }
     return inliersResult;
 }
 
@@ -227,16 +224,16 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 
 template<typename PointT>           
 void ProcessPointClouds<PointT>::clusterHelper(int i, typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol, std::vector<bool> &processed, std::vector<int> &cluster)
-{	
-	processed[i] = true;
-	cluster.push_back(i);
-	std::vector<int> nearest = tree->search(cloud->points[i], distanceTol);
-	for(int k : nearest)
-	{
-		if(!processed[k]) {
-			clusterHelper(k, cloud, tree, distanceTol, processed, cluster);
+{
+    processed[i] = true;
+    cluster.push_back(i);
+    std::vector<int> nearest = tree->search(cloud->points[i], distanceTol);
+    for(int k : nearest)
+    {
+        if(!processed[k]) {
+            clusterHelper(k, cloud, tree, distanceTol, processed, cluster);
         }
-	}
+    }
 }
 
 template<typename PointT>
