@@ -56,9 +56,8 @@ public:
 
     std::vector<boost::filesystem::path> streamPcd(std::string dataPath);
 
-    void clusterHelper(int i, typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol, std::vector<bool> &processed, std::vector<int> &cluster);
-  
 private:
     std::unordered_set<int> myRansac(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceThreshold);
+    void clusterHelper(int i, typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol, std::vector<bool> &processed, std::vector<int> &cluster);
 };
 #endif /* PROCESSPOINTCLOUDS_H_ */

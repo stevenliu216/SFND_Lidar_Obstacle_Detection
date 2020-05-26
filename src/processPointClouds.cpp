@@ -98,10 +98,12 @@ std::unordered_set<int> ProcessPointClouds<PointT>::myRansac(typename pcl::Point
             iinliers.insert(rand() % (numcloud));
         }
 
+        // sample 3 points
         PointT p1=cloud->points[(rand() % numcloud)];
         PointT p2=cloud->points[(rand() % numcloud)];
         PointT p3=cloud->points[(rand() % numcloud)];
 
+        // fit plane
         float A = (p2.y - p1.y)*(p3.z - p1.z) - (p2.z - p1.z)*(p3.y - p1.y);
         float B = (p2.z - p1.z)*(p3.x - p1.x) - (p2.x - p1.x)*(p3.z - p1.z);
         float C = (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
@@ -112,6 +114,7 @@ std::unordered_set<int> ProcessPointClouds<PointT>::myRansac(typename pcl::Point
                 //skip if in iinliers already
                 continue;
             }
+
             // for each point, do distance test
             PointT point = cloud->points[index];
             float ds = fabs(A*point.x + B*point.y + C*point.z + D) / sqrt(A*A + B*B + C*C);
@@ -225,6 +228,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 template<typename PointT>           
 void ProcessPointClouds<PointT>::clusterHelper(int i, typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol, std::vector<bool> &processed, std::vector<int> &cluster)
 {
+    // from quiz
     processed[i] = true;
     cluster.push_back(i);
     std::vector<int> nearest = tree->search(cloud->points[i], distanceTol);
@@ -245,6 +249,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::m
     std::vector<std::vector<int>> clusters_idx;
     std::vector<bool> processed (cloud->points.size(), false);
 
+    // from quiz
     KdTree *tree = new KdTree;
     for (int i=0; i<cloud->points.size(); ++i) {
         tree->insert(cloud->points[i], i);

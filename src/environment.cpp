@@ -71,7 +71,6 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 
 }
 
-//void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
 void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointClouds<pcl::PointXYZI>* pointProcessorI, const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputCloud)
 {
   //filter the cloud with voxel downsampling + roi
@@ -100,7 +99,6 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
 //setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
 void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
-
     viewer->setBackgroundColor (0, 0, 0);
     
     // set camera position and angle

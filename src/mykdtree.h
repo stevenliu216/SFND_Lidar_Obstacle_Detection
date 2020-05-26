@@ -4,9 +4,10 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h>
 
+// from quiz
 struct Node
 {
-    pcl::PointXYZI point;
+    pcl::PointXYZI point; //working with pcl points now
     int id;
     Node* left;
     Node* right;
